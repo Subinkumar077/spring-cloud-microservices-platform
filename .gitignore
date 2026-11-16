@@ -1,0 +1,33 @@
+# IDEs and editor metadata
+.idea/
+*.iml
+.vscode/
+
+# Java and Maven build output
+**/target/
+**/out/
+*.class
+*.jar
+*.war
+
+# Local logs and temporary files
+*.log
+*.tmp
+*.swp
+
+# Local environment and secret files
+.env
+.env.*
+!.env.example
+**/application-local.properties
+**/application-local.yml
+**/*-secrets.properties
+**/*-secrets.yml
+*.pem
+*.key
+*.p12
+*.jks
+
+# OS metadata
+.DS_Store
+Thumbs.db
