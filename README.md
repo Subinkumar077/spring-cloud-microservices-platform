@@ -8,82 +8,15 @@ communication, polyglot persistence, OAuth 2.0 security, and resilience patterns
 > secrets through environment variables or an ignored local configuration file.
 
 ## Architecture
+<img width="1335" height="668" alt="image" src="https://github.com/user-attachments/assets/0ff9a2d0-1f20-42b3-ad99-c6c135075570" />
 
-```mermaid
-flowchart TB
-    Client[Client / Postman]
-    Okta[Okta OAuth 2.0 / OIDC]
+### Service Registry
 
-    subgraph Edge["Edge layer"]
-        Gateway[API Gateway<br/>:8084]
-    end
+<img width="1285" height="701" alt="image" src="https://github.com/user-attachments/assets/8885d498-4f0a-499c-9e0c-9e2bb1e5c8ad" />
 
-    subgraph Platform["Platform services"]
-        Eureka[Eureka Service Registry<br/>:8761]
-        Config[Config Server<br/>:8085]
-        Git[(Git configuration repository)]
-    end
+## Request Flow
 
-    subgraph Services["Business services"]
-        User[User Service<br/>:8080]
-        Hotel[Hotel Service<br/>:8081]
-        Rating[Rating Service<br/>:8082]
-    end
-
-    subgraph Data["Service-owned data"]
-        UserDB[(PostgreSQL<br/>microservices)]
-        HotelDB[(PostgreSQL<br/>hotelservice)]
-        RatingDB[(MongoDB<br/>microservices)]
-    end
-
-    Client -->|HTTP| Gateway
-    Gateway -.->|OAuth2 login / JWT validation| Okta
-    Gateway -->|service routes| User
-    Gateway -->|service routes| Hotel
-    Gateway -->|service routes| Rating
-
-    Gateway -.->|register / discover| Eureka
-    User -.->|register / discover| Eureka
-    Hotel -.->|register / discover| Eureka
-    Rating -.->|register / discover| Eureka
-    Config -->|reads configuration| Git
-
-    User -->|OpenFeign + LoadBalancer| Rating
-    User -->|OpenFeign + LoadBalancer| Hotel
-    User --> UserDB
-    Hotel --> HotelDB
-    Rating --> RatingDB
-
-    classDef control fill:#eef2ff,stroke:#4f46e5,color:#111827
-    classDef service fill:#ecfdf5,stroke:#059669,color:#111827
-    classDef data fill:#fff7ed,stroke:#ea580c,color:#111827
-    class Eureka,Config,Git control
-    class User,Hotel,Rating service
-    class UserDB,HotelDB,RatingDB data
-```
-
-### Request flow
-
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant U as UserService
-    participant R as RatingService
-    participant H as HotelService
-    participant DB as Databases
-
-    C->>U: GET /users/{userId}
-    U->>DB: Load user
-    U->>R: GET /ratings/user/{userId}
-    R->>DB: Load ratings
-    R-->>U: Ratings with hotel IDs
-    loop Each rating
-        U->>H: GET /hotels/{hotelId}
-        H->>DB: Load hotel
-        H-->>U: Hotel details
-    end
-    U-->>C: User with ratings and hotels
-```
+<img width="1167" height="542" alt="image" src="https://github.com/user-attachments/assets/58e00403-349b-4793-a029-7af75e2d81a4" />
 
 ## Services
 
