@@ -10,20 +10,56 @@ communication, polyglot persistence, OAuth 2.0 security, and resilience patterns
 ## Architecture
 
 ```mermaid
-flowchart LR
-    Client[Client / Postman] --> Gateway[API Gateway<br/>:8084]
-    Gateway --> Eureka[Eureka Service Registry<br/>:8761]
-    Gateway --> User[User Service<br/>:8080]
-    Gateway --> Hotel[Hotel Service<br/>:8081]
-    Gateway --> Rating[Rating Service<br/>:8082]
-    User --> Eureka
-    Hotel --> Eureka
-    Rating --> Eureka
-    User -->|OpenFeign| Rating
-    User -->|OpenFeign| Hotel
-    User --> UserDB[(PostgreSQL<br/>microservices)]
-    Hotel --> HotelDB[(PostgreSQL<br/>hotelservice)]
-    Rating --> RatingDB[(MongoDB<br/>microservices)]
+flowchart TB
+    Client[Client / Postman]
+    Okta[Okta OAuth 2.0 / OIDC]
+
+    subgraph Edge["Edge layer"]
+        Gateway[API Gateway<br/>:8084]
+    end
+
+    subgraph Platform["Platform services"]
+        Eureka[Eureka Service Registry<br/>:8761]
+        Config[Config Server<br/>:8085]
+        Git[(Git configuration repository)]
+    end
+
+    subgraph Services["Business services"]
+        User[User Service<br/>:8080]
+        Hotel[Hotel Service<br/>:8081]
+        Rating[Rating Service<br/>:8082]
+    end
+
+    subgraph Data["Service-owned data"]
+        UserDB[(PostgreSQL<br/>microservices)]
+        HotelDB[(PostgreSQL<br/>hotelservice)]
+        RatingDB[(MongoDB<br/>microservices)]
+    end
+
+    Client -->|HTTP| Gateway
+    Gateway -.->|OAuth2 login / JWT validation| Okta
+    Gateway -->|service routes| User
+    Gateway -->|service routes| Hotel
+    Gateway -->|service routes| Rating
+
+    Gateway -.->|register / discover| Eureka
+    User -.->|register / discover| Eureka
+    Hotel -.->|register / discover| Eureka
+    Rating -.->|register / discover| Eureka
+    Config -->|reads configuration| Git
+
+    User -->|OpenFeign + LoadBalancer| Rating
+    User -->|OpenFeign + LoadBalancer| Hotel
+    User --> UserDB
+    Hotel --> HotelDB
+    Rating --> RatingDB
+
+    classDef control fill:#eef2ff,stroke:#4f46e5,color:#111827
+    classDef service fill:#ecfdf5,stroke:#059669,color:#111827
+    classDef data fill:#fff7ed,stroke:#ea580c,color:#111827
+    class Eureka,Config,Git control
+    class User,Hotel,Rating service
+    class UserDB,HotelDB,RatingDB data
 ```
 
 ### Request flow
