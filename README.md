@@ -1,3 +1,5 @@
+[![Watch the project demo on YouTube](https://img.youtube.com/vi/ll3YN1xQppg/hqdefault.jpg)](https://www.youtube.com/watch?v=ll3YN1xQppg)
+
 # Spring Cloud Microservices Platform
 
 A production-oriented learning platform built with Spring Boot and Spring Cloud. The
