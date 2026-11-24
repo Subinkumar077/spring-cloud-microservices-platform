@@ -57,6 +57,7 @@ running.
 ├── RatingService/    # Rating API backed by MongoDB
 ├── ServiceRegistry/  # Eureka discovery server
 ├── UserService/      # User API and aggregation layer
+├── frontend/         # React + Vite workspace dashboard
 └── README.md
 ```
 
@@ -105,6 +106,7 @@ in this order:
 4. `UserService`
 5. `ApiGateway` (optional)
 6. `ConfigServer` (optional, for centralized configuration)
+7. `frontend` (optional, for the browser dashboard)
 
 From a separate PowerShell window for each service:
 
@@ -115,6 +117,22 @@ cd C:\path\to\Microservices\ServiceRegistry
 
 Repeat with the other service directories. This README documents the commands but does
 not start any service automatically.
+
+### Frontend
+
+The React + Vite dashboard runs at `http://localhost:5173`. It reads and creates hotels,
+guests, and ratings through the local development proxy. Start `HotelService`,
+`UserService`, and `RatingService` first, then run:
+
+```powershell
+cd C:\path\to\Microservices\frontend
+npm install
+npm run dev
+```
+
+The Vite proxy forwards `/api/users`, `/api/hotels`, and `/api/ratings` to their
+respective local services on ports `8080`, `8081`, and `8082`. The frontend's create
+forms use the existing service APIs; data is not mocked or persisted by the frontend.
 
 ## API examples
 
@@ -183,3 +201,73 @@ does not replace credential rotation.
 
 No license has been selected for this project yet. Add a license before distributing it
 outside the project team.
+
+## Starting the full Microservices project
+
+Start PostgreSQL and MongoDB first. Make sure PostgreSQL contains the `microservices`
+and `hotelservice` databases, and MongoDB is available with the `microservices`
+database. Open a separate PowerShell window for each service and leave it running.
+
+Start the services in this order:
+
+1. **ServiceRegistry**
+
+   ```powershell
+   Set-Location C:\path\to\Microservices\ServiceRegistry
+   .\mvnw.cmd spring-boot:run
+   ```
+
+2. **ConfigServer** (optional; uses the configured Git repository)
+
+   ```powershell
+   Set-Location C:\path\to\Microservices\ConfigServer
+   .\mvnw.cmd spring-boot:run
+   ```
+
+3. **HotelService** — set the database variables in the same PowerShell window:
+
+   ```powershell
+   $env:HOTEL_DB_USERNAME = "postgres"
+   $env:HOTEL_DB_PASSWORD = "<hotel-database-password>"
+   Set-Location C:\path\to\Microservices\HotelService
+   .\mvnw.cmd spring-boot:run
+   ```
+
+4. **RatingService**
+
+   ```powershell
+   Set-Location C:\path\to\Microservices\RatingService
+   .\mvnw.cmd spring-boot:run
+   ```
+
+5. **UserService** — set the database variables in the same PowerShell window:
+
+   ```powershell
+   $env:USER_DB_USERNAME = "postgres"
+   $env:USER_DB_PASSWORD = "<user-database-password>"
+   Set-Location C:\path\to\Microservices\UserService
+   .\mvnw.cmd spring-boot:run
+   ```
+
+6. **ApiGateway** (optional; requires a configured Okta OIDC application)
+
+   ```powershell
+   $env:OKTA_CLIENT_SECRET = "<okta-client-secret>"
+   Set-Location C:\path\to\Microservices\ApiGateway
+   .\mvnw.cmd spring-boot:run
+   ```
+
+7. **Frontend** — install dependencies once, then start Vite:
+
+   ```powershell
+   Set-Location C:\path\to\Microservices\frontend
+   npm install
+   npm run dev
+   ```
+
+Open `http://localhost:5173` for the dashboard. The local frontend proxy connects
+directly to UserService, HotelService, and RatingService; it does not require the
+gateway. Eureka is at `http://localhost:8761`.
+
+Use your own local database and Okta credentials. Keep them in environment variables
+or ignored local configuration files, and never commit them.

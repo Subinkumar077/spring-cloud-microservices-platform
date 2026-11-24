@@ -9,6 +9,8 @@
 *.class
 *.jar
 *.war
+node_modules/
+dist/
 
 # Local logs and temporary files
 *.log
