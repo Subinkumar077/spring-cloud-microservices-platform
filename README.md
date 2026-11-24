@@ -1,6 +1,10 @@
-[![Watch the project demo on YouTube](https://img.youtube.com/vi/ll3YN1xQppg/hqdefault.jpg)](https://www.youtube.com/watch?v=ll3YN1xQppg)
-
 # Spring Cloud Microservices Platform
+
+## Project Demo
+
+Watch the project walkthrough on YouTube:
+
+[![Watch the Spring Cloud Microservices Platform demo](https://img.youtube.com/vi/ll3YN1xQppg/hqdefault.jpg)](https://www.youtube.com/watch?v=ll3YN1xQppg)
 
 A production-oriented learning platform built with Spring Boot and Spring Cloud. The
 application demonstrates service discovery, API routing, synchronous service-to-service
